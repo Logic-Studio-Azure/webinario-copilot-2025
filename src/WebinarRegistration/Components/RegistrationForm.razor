@@ -1,0 +1,91 @@
+@using WebinarRegistration.Models
+@inject WebinarRegistration.Services.IAttendeeService AttendeeService
+
+<EditForm Model="_model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-grid">
+        <div>
+            <label>Nombre</label>
+            <InputText @bind-Value="_model.Name" class="input" />
+            <ValidationMessage For="() => _model.Name" />
+        </div>
+        <div>
+            <label>Empresa</label>
+            <InputText @bind-Value="_model.Company" class="input" />
+        </div>
+        <div>
+            <label>Teléfono</label>
+            <InputText @bind-Value="_model.Phone" class="input" />
+        </div>
+        <div class="full">
+            <label>Email</label>
+            <InputText @bind-Value="_model.Email" class="input" type="email" />
+            <ValidationMessage For="() => _model.Email" />
+        </div>
+        <div class="full privacy">
+            Al registrarte aceptas el uso de tus datos para la gestión del webinario. No serán compartidos con terceros.
+        </div>
+        <div class="full">
+            <button type="submit" class="btn-primary" disabled="@_saving">@(_saving ? "Guardando..." : "Registrar")</button>
+            <button type="button" class="btn-secondary" @onclick="ClearAttendees" disabled="@_clearing">
+                @(_clearing ? "Limpiando..." : "Limpiar asistentes")
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+@if (_successMessage is not null)
+{
+    <p class="success">@_successMessage</p>
+}
+
+@code {
+    private AttendeeInputModel _model = new();
+    private bool _saving;
+    private bool _clearing;
+    private string? _successMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        _saving = true; _successMessage = null;
+        var attendee = new Attendee
+        {
+            Name = _model.Name.Trim(),
+            Company = _model.Company?.Trim() ?? string.Empty,
+            Phone = _model.Phone?.Trim() ?? string.Empty,
+            Email = _model.Email.Trim()
+        };
+        await AttendeeService.AddAsync(attendee);
+        _model = new();
+        _successMessage = "Registro exitoso";
+        _saving = false;
+    }
+
+    private async Task ClearAttendees()
+    {
+        if (_clearing) return;
+        _clearing = true;
+        _successMessage = null;
+        await AttendeeService.ClearAllAsync(); // ya implementado
+        _successMessage = "Asistentes eliminados";
+        _clearing = false;
+    }
+
+    public class AttendeeInputModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.StringLength(80, MinimumLength = 2)]
+        public string Name { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.StringLength(120)]
+        public string? Company { get; set; }
+
+        [System.ComponentModel.DataAnnotations.StringLength(40)]
+        public string? Phone { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    }
+}

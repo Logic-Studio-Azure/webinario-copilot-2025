@@ -1,0 +1,67 @@
+@using WebinarRegistration.Models
+@inject WebinarRegistration.Services.IAttendeeService AttendeeService
+
+<h3>Asistentes Registrados (@_attendees.Count)</h3>
+<div class="actions">
+    <button class="btn" @onclick="ExportCsv">Exportar CSV</button>
+    <button class="btn" @onclick="ExportJson">Exportar JSON</button>
+    <button class="btn" @onclick="Refresh">Refrescar</button>
+</div>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_attendees.Count == 0)
+{
+    <p>No hay registros aún.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="attendees">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Empresa</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Registro (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in _attendees)
+                {
+                    <tr>
+                        <td>@a.Name</td>
+                        <td>@a.Company</td>
+                        <td>@a.Phone</td>
+                        <td>@a.Email</td>
+                        <td>@a.RegisteredAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Attendee> _attendees = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _attendees = (await AttendeeService.GetAllAsync()).ToList();
+        _loading = false;
+    }
+
+    private async Task Refresh() => await LoadAsync();
+    private async Task ExportCsv() => await AttendeeService.ExportCsvAsync();
+    private async Task ExportJson() => await AttendeeService.ExportJsonAsync();
+}
