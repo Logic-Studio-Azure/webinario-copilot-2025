@@ -1,49 +1,63 @@
 @using WebinarRegistration.Models
 @inject WebinarRegistration.Services.IAttendeeService AttendeeService
 
-<h3>Asistentes Registrados (@_attendees.Count)</h3>
-<div class="actions">
-    <button class="btn" @onclick="ExportCsv">Exportar CSV</button>
-    <button class="btn" @onclick="ExportJson">Exportar JSON</button>
-    <button class="btn" @onclick="Refresh">Refrescar</button>
-</div>
-
-@if (_loading)
-{
-    <p>Cargando...</p>
-}
-else if (_attendees.Count == 0)
-{
-    <p>No hay registros aún.</p>
-}
-else
-{
-    <div class="table-wrapper">
-        <table class="attendees">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Empresa</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Registro (UTC)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var a in _attendees)
-                {
-                    <tr>
-                        <td>@a.Name</td>
-                        <td>@a.Company</td>
-                        <td>@a.Phone</td>
-                        <td>@a.Email</td>
-                        <td>@a.RegisteredAt.ToString("yyyy-MM-dd HH:mm")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div style="margin-top: 2rem;">
+    <h3 style="color: #2F4F4F; margin-bottom: 1.5rem;">Asistentes Registrados (@_attendees.Count)</h3>
+    
+    <div class="actions">
+        <button class="btn" @onclick="ExportCsv">
+            📊 Exportar CSV
+        </button>
+        <button class="btn" @onclick="ExportJson">
+            📄 Exportar JSON
+        </button>
+        <button class="btn" @onclick="Refresh">
+            🔄 Refrescar
+        </button>
     </div>
-}
+
+    @if (_loading)
+    {
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <p>⏳ Cargando asistentes...</p>
+        </div>
+    }
+    else if (_attendees.Count == 0)
+    {
+        <div style="text-align: center; padding: 3rem; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(70, 130, 180, 0.1);">
+            <p style="color: #6c757d; font-size: 1.1rem; margin: 0;">👥 No hay registros aún.</p>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-top: 0.5rem;">Los asistentes registrados aparecerán aquí.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="attendees">
+                <thead>
+                    <tr>
+                        <th>👤 Nombre</th>
+                        <th>🏢 Empresa</th>
+                        <th>📞 Teléfono</th>
+                        <th>📧 Email</th>
+                        <th>📅 Registro (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in _attendees)
+                    {
+                        <tr>
+                            <td style="font-weight: 500;">@a.Name</td>
+                            <td>@a.Company</td>
+                            <td>@a.Phone</td>
+                            <td style="color: #4682B4;">@a.Email</td>
+                            <td style="color: #6c757d; font-size: 0.85rem;">@a.RegisteredAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
 
 @code {
     private List<Attendee> _attendees = new();
