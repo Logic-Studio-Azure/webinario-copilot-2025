@@ -1,8 +1,11 @@
 @page "/organizer"
 @inject WebinarRegistration.Services.IAttendeeService AttendeeService
 
-<h1>Panel Organizador</h1>
-<p>Total registrados: @_count</p>
+<div class="page-header">
+    <h1>Panel de Organizador</h1>
+    <p>Gestiona y consulta los asistentes registrados. Total registrados: <strong>@_count</strong></p>
+</div>
+
 <AttendeeList />
 
 @code {
