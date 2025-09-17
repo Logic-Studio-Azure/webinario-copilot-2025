@@ -1,0 +1,14 @@
+@page "/organizer"
+@inject WebinarRegistration.Services.IAttendeeService AttendeeService
+
+<h1>Panel Organizador</h1>
+<p>Total registrados: @_count</p>
+<AttendeeList />
+
+@code {
+    private int _count;
+    protected override async Task OnInitializedAsync()
+    {
+        _count = await AttendeeService.CountAsync();
+    }
+}
