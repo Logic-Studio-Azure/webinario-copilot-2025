@@ -1,0 +1,117 @@
+/* CSS-only Icons for Corporate Theme */
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    fill: currentColor;
+}
+
+/* User Icon */
+.icon-user::before {
+    content: "👤";
+    font-style: normal;
+}
+
+/* Building/Company Icon */
+.icon-building::before {
+    content: "🏢";
+    font-style: normal;
+}
+
+/* Phone Icon */
+.icon-phone::before {
+    content: "📞";
+    font-style: normal;
+}
+
+/* Email Icon */
+.icon-envelope::before {
+    content: "📧";
+    font-style: normal;
+}
+
+/* Calendar Icon */
+.icon-calendar::before {
+    content: "📅";
+    font-style: normal;
+}
+
+/* Users Icon */
+.icon-users::before {
+    content: "👥";
+    font-style: normal;
+}
+
+/* Check Icon */
+.icon-check::before {
+    content: "✓";
+    font-style: normal;
+}
+
+/* Sync/Refresh Icon */
+.icon-sync::before {
+    content: "🔄";
+    font-style: normal;
+}
+
+/* Download Icon */
+.icon-download::before {
+    content: "💾";
+    font-style: normal;
+}
+
+/* Clock Icon */
+.icon-clock::before {
+    content: "🕐";
+    font-style: normal;
+}
+
+/* Eraser Icon */
+.icon-eraser::before {
+    content: "🗑️";
+    font-style: normal;
+}
+
+/* Info Icon */
+.icon-info::before {
+    content: "ℹ️";
+    font-style: normal;
+}
+
+/* Shield Icon */
+.icon-shield::before {
+    content: "🛡️";
+    font-style: normal;
+}
+
+/* User Plus Icon */
+.icon-user-plus::before {
+    content: "👤➕";
+    font-style: normal;
+}
+
+/* External Link Icon */
+.icon-external-link::before {
+    content: "🔗";
+    font-style: normal;
+}
+
+/* Spinner animation for loading */
+.icon-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Adjust icon size for different contexts */
+.icon-lg {
+    font-size: 1.25em;
+}
+
+.icon-sm {
+    font-size: 0.875em;
+}

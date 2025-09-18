@@ -5,43 +5,136 @@
 <PageTitle>Organizador</PageTitle>
 
 <div class="container py-4">
-    <h1 class="h4 mb-3 d-flex justify-content-between align-items-center">Listado de Asistentes <span class="badge bg-secondary">@_attendees.Count</span></h1>
-    <div class="d-flex gap-2 mb-3">
-    <button class="btn btn-outline-primary btn-sm" @onclick="() => RefreshAsync()" disabled="@_loading">Actualizar</button>
-        <button class="btn btn-outline-success btn-sm" @onclick="ExportCsv" disabled="@(!_attendees.Any())">Exportar CSV</button>
-        <span class="text-muted small">@(_loading ? "Cargando..." : _lastRefreshedText)</span>
-    </div>
-    <div class="table-responsive small">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Fecha (UTC)</th>
-                    <th>Nombre</th>
-                    <th>Empresa</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="attendee-list-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-primary">
+                <span class="icon-users me-2"></span>
+                Listado de Asistentes
+            </h1>
+            <span class="badge fs-6">@_attendees.Count</span>
+        </div>
+        
+        <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+            <button class="btn btn-outline-primary" @onclick="() => RefreshAsync()" disabled="@_loading">
+                <span class="icon-sync me-1 @(_loading ? "icon-spinner" : "")"></span>
+                Actualizar
+            </button>
+            <button class="btn btn-outline-success" @onclick="ExportCsv" disabled="@(!_attendees.Any())">
+                <span class="icon-download me-1"></span>
+                Exportar CSV
+            </button>
+            <small class="text-muted ms-auto">
+                <span class="icon-clock me-1"></span>
+                @(_loading ? "Cargando..." : _lastRefreshedText)
+            </small>
+        </div>
+        
+        <div class="table-responsive">
             @if(_attendees.Count == 0)
             {
-                <tr><td colspan="5" class="text-center text-muted">Sin registros todavía</td></tr>
+                <div class="text-center py-5">
+                    <span class="icon-users icon-lg icon-lg icon-lg text-muted mb-3" style="font-size: 3rem; display: block;"></span>
+                    <h5 class="text-muted">Sin registros todavía</h5>
+                    <p class="text-muted">Los asistentes registrados aparecerán aquí</p>
+                </div>
             }
             else
             {
-                @foreach(var a in _attendees)
-                {
-                    <tr>
-                        <td>@a.CreatedUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                        <td>@a.Nombre</td>
-                        <td>@a.Empresa</td>
-                        <td>@a.Telefono</td>
-                        <td><a href="mailto:@a.Correo">@a.Correo</a></td>
-                    </tr>
-                }
+                <!-- Mobile Card View (visible on small screens) -->
+                <div class="d-block d-md-none">
+                    @foreach(var a in _attendees)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">
+                                        <span class="icon-user me-1"></span>
+                                        @a.Nombre
+                                    </h6>
+                                    <small class="text-muted">@a.CreatedUtc.ToString("dd/MM/yyyy")</small>
+                                </div>
+                                @if (!string.IsNullOrEmpty(a.Empresa))
+                                {
+                                    <p class="card-text mb-1">
+                                        <span class="icon-building me-1 text-muted"></span>
+                                        <small>@a.Empresa</small>
+                                    </p>
+                                }
+                                @if (!string.IsNullOrEmpty(a.Telefono))
+                                {
+                                    <p class="card-text mb-1">
+                                        <span class="icon-phone me-1 text-muted"></span>
+                                        <small>@a.Telefono</small>
+                                    </p>
+                                }
+                                <p class="card-text mb-0">
+                                    <span class="icon-envelope me-1 text-muted"></span>
+                                    <small><a href="mailto:@a.Correo" class="text-decoration-none">@a.Correo</a></small>
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <!-- Desktop Table View (visible on medium+ screens) -->
+                <table class="table table-hover d-none d-md-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <span class="icon-calendar me-1"></span>
+                                Fecha (UTC)
+                            </th>
+                            <th>
+                                <span class="icon-user me-1"></span>
+                                Nombre
+                            </th>
+                            <th>
+                                <span class="icon-building me-1"></span>
+                                Empresa
+                            </th>
+                            <th>
+                                <span class="icon-phone me-1"></span>
+                                Teléfono
+                            </th>
+                            <th>
+                                <span class="icon-envelope me-1"></span>
+                                Correo
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var a in _attendees)
+                        {
+                            <tr>
+                                <td>
+                                    <small>@a.CreatedUtc.ToString("yyyy-MM-dd")</small><br>
+                                    <small class="text-muted">@a.CreatedUtc.ToString("HH:mm:ss")</small>
+                                </td>
+                                <td class="fw-medium">@a.Nombre</td>
+                                <td>@(string.IsNullOrEmpty(a.Empresa) ? "-" : a.Empresa)</td>
+                                <td>@(string.IsNullOrEmpty(a.Telefono) ? "-" : a.Telefono)</td>
+                                <td>
+                                    <a href="mailto:@a.Correo" class="text-decoration-none">
+                                        <span class="icon-external-link me-1"></span>
+                                        @a.Correo
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             }
-            </tbody>
-        </table>
+        </div>
+        
+        @if(_attendees.Count > 0)
+        {
+            <div class="border-top pt-3 mt-3">
+                <small class="text-muted">
+                    <span class="icon-info me-1"></span>
+                    Total de registros: <strong>@_attendees.Count</strong>
+                </small>
+            </div>
+        }
     </div>
 </div>
 

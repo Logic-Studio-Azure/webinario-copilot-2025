@@ -4,11 +4,13 @@
 
 .top-row {
     min-height: 3.5rem;
-    background-color: rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, var(--corporate-celeste) 0%, var(--corporate-celeste-dark) 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .navbar-brand {
     font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .bi {
@@ -56,12 +58,13 @@
     }
 
 .nav-item ::deep a.active {
-    background-color: rgba(255,255,255,0.37);
-    color: white;
+    background-color: var(--corporate-white);
+    color: var(--corporate-celeste);
+    font-weight: 600;
 }
 
 .nav-item ::deep a:hover {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.2);
     color: white;
 }
 
