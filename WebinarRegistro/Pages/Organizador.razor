@@ -1,0 +1,87 @@
+@page "/organizador"
+@using WebinarRegistro.Models
+@inject WebinarRegistro.Services.AttendeeService AttendeeService
+
+<PageTitle>Organizador</PageTitle>
+
+<div class="container py-4">
+    <h1 class="h4 mb-3 d-flex justify-content-between align-items-center">Listado de Asistentes <span class="badge bg-secondary">@_attendees.Count</span></h1>
+    <div class="d-flex gap-2 mb-3">
+    <button class="btn btn-outline-primary btn-sm" @onclick="() => RefreshAsync()" disabled="@_loading">Actualizar</button>
+        <button class="btn btn-outline-success btn-sm" @onclick="ExportCsv" disabled="@(!_attendees.Any())">Exportar CSV</button>
+        <span class="text-muted small">@(_loading ? "Cargando..." : _lastRefreshedText)</span>
+    </div>
+    <div class="table-responsive small">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha (UTC)</th>
+                    <th>Nombre</th>
+                    <th>Empresa</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if(_attendees.Count == 0)
+            {
+                <tr><td colspan="5" class="text-center text-muted">Sin registros todavía</td></tr>
+            }
+            else
+            {
+                @foreach(var a in _attendees)
+                {
+                    <tr>
+                        <td>@a.CreatedUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@a.Nombre</td>
+                        <td>@a.Empresa</td>
+                        <td>@a.Telefono</td>
+                        <td><a href="mailto:@a.Correo">@a.Correo</a></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Attendee> _attendees = new();
+    private bool _loading;
+    private string _lastRefreshedText = string.Empty;
+    private Timer? _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+        _timer = new Timer(async _ => {
+            await InvokeAsync(async () => await RefreshAsync(auto:true));
+        }, null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));
+    }
+
+    private async Task RefreshAsync(bool auto = false)
+    {
+        _loading = true;
+        var data = await AttendeeService.GetAllAsync();
+        _attendees = data.ToList();
+        _loading = false;
+        _lastRefreshedText = $"Actualizado {(auto ? "(auto) " : string.Empty)}a las {DateTime.UtcNow:HH:mm:ss}Z";
+    }
+
+    private async Task ExportCsv()
+    {
+        var csv = await AttendeeService.ExportCsvAsync();
+        if(string.IsNullOrWhiteSpace(csv)) return;
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+        var base64 = Convert.ToBase64String(bytes);
+        var fileName = $"asistentes_{DateTime.UtcNow:yyyyMMdd_HHmmss}Z.csv";
+        await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, "text/csv", base64);
+    }
+
+    [Inject] IJSRuntime JS { get; set; } = default!;
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

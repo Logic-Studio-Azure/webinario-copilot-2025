@@ -1,0 +1,67 @@
+﻿@page "/"
+@using WebinarRegistro.Models
+@inject WebinarRegistro.Services.AttendeeService AttendeeService
+
+<PageTitle>Registro</PageTitle>
+
+<div class="container py-4">
+	<h1 class="h3 mb-3">Registro de Asistentes</h1>
+	<EditForm Model="_model" OnValidSubmit="OnSubmitAsync">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div class="row g-3">
+			<div class="col-md-6">
+				<label class="form-label">Nombre *</label>
+				<InputText class="form-control" @bind-Value="_model.Nombre" />
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Empresa</label>
+				<InputText class="form-control" @bind-Value="_model.Empresa" />
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Teléfono</label>
+				<InputText class="form-control" @bind-Value="_model.Telefono" />
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Correo *</label>
+				<InputText class="form-control" @bind-Value="_model.Correo" type="email" />
+			</div>
+			<div class="col-12 d-flex gap-2">
+				<button class="btn btn-primary" disabled="@_saving">
+					@(_saving ? "Guardando..." : "Registrar")
+				</button>
+				<button type="button" class="btn btn-outline-secondary" @onclick="ResetForm" disabled="@_saving">Limpiar</button>
+			</div>
+		</div>
+	</EditForm>
+	@if(_saved)
+	{
+		<div class="alert alert-success mt-3 p-2">Registro guardado ✅</div>
+	}
+	<p class="small text-muted mt-4">Al registrarte aceptas el uso de tus datos únicamente para la gestión del webinario.</p>
+</div>
+
+@code {
+	private Attendee _model = new();
+	private bool _saving;
+	private bool _saved;
+
+	private async Task OnSubmitAsync()
+	{
+		_saving = true;
+		_saved = false;
+		await AttendeeService.AddAsync(_model);
+		_model = new();
+		_saving = false;
+		_saved = true;
+		StateHasChanged();
+		await Task.Delay(3000);
+		_saved = false;
+		StateHasChanged();
+	}
+
+	private void ResetForm()
+	{
+		_model = new();
+	}
+}
