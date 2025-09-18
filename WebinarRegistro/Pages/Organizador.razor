@@ -1,0 +1,83 @@
+@page "/organizador"
+@using WebinarRegistro.Models
+@inject Services.AttendeeStorage Storage
+@inject IJSRuntime JS
+
+<h1>Asistentes Registrados (@attendees.Count)</h1>
+
+<div class="actions">
+    <button @onclick="ExportCsv">Exportar CSV</button>
+    <button class="secondary" @onclick="Limpiar" disabled="@(attendees.Count==0)">Vaciar Lista</button>
+</div>
+
+@if (attendees.Count == 0)
+{
+    <p>No hay asistentes registrados aún.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Empresa</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Fecha (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var a in attendees.OrderBy(a => a.FechaRegistro))
+            {
+                <tr>
+                    <td>@a.Nombre</td>
+                    <td>@a.Empresa</td>
+                    <td>@a.Telefono</td>
+                    <td>@a.Correo</td>
+                    <td style="white-space:nowrap">@a.FechaRegistro.ToString("HH:mm:ss")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Attendee> attendees = new();
+    private bool exporting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Storage.OnChanged += Refresh;
+        attendees = await Storage.GetAllAsync();
+    }
+
+    private async void Refresh()
+    {
+        attendees = await Storage.GetAllAsync();
+        StateHasChanged();
+    }
+
+    private async Task ExportCsv()
+    {
+        if (exporting) return;
+        exporting = true;
+        var csv = await Storage.ExportCsvAsync();
+        var base64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(csv));
+        await JS.InvokeVoidAsync("storage.downloadCsv", base64, "asistentes.csv");
+        exporting = false;
+    }
+
+    private async Task Limpiar()
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "¿Seguro que deseas vaciar la lista?")) return;
+        await Storage.ClearAsync();
+        attendees.Clear();
+    }
+
+    public void Dispose()
+    {
+        Storage.OnChanged -= Refresh;
+    }
+}

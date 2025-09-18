@@ -1,0 +1,63 @@
+@page "/registro"
+@using WebinarRegistro.Models
+@inject Services.AttendeeStorage Storage
+
+<h1>Registro de Asistente</h1>
+
+<EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-grid">
+        <label>Nombre *<InputText @bind-Value="model.Nombre" /></label>
+        <label>Empresa <InputText @bind-Value="model.Empresa" /></label>
+        <label>Teléfono <InputText @bind-Value="model.Telefono" /></label>
+        <label>Correo *<InputText @bind-Value="model.Correo" type="email" /></label>
+    </div>
+    <button disabled="@saving" type="submit">@(saving ? "Guardando..." : "Registrar")</button>
+</EditForm>
+
+<div class="admin-actions">
+    <button type="button" disabled="@(saving || clearing)" @onclick="ClearAllAsync">
+        @(clearing ? "Borrando..." : "Borrar todos")
+    </button>
+</div>
+
+@if (successMessage is not null)
+{
+    <p class="success">@successMessage</p>
+}
+
+<section class="privacy">
+    <small>Al enviar, aceptas el uso de tus datos para la gestión del webinario. No compartiremos tu información con terceros.</small>
+</section>
+
+@code {
+    private Attendee model = new();
+    private bool saving = false;
+    private string? successMessage;
+    private bool clearing = false; // nuevo estado
+
+    private async Task HandleValidSubmit()
+    {
+        if (saving) return;
+        saving = true;
+        successMessage = null;
+        model.FechaRegistro = DateTime.UtcNow;
+        await Storage.AddAsync(model);
+        var nombre = model.Nombre;
+        model = new();
+        saving = false;
+        successMessage = $"Registro exitoso. Gracias {nombre}!";
+    }
+
+    private async Task ClearAllAsync()
+    {
+        if (clearing) return;
+        clearing = true;
+        successMessage = null;
+        await Storage.ClearAsync();
+        model = new();
+        successMessage = "Lista de asistentes borrada.";
+        clearing = false;
+    }
+}
